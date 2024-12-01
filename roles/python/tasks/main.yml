@@ -1,0 +1,74 @@
+- name: If Python 3 is already installed, do nothing
+  become: yes
+  stat:
+    path: /opt/Python/Python-{{ python_version }}/bin/python3
+  register: python3_installed
+
+- name: Install Python 3 dependencies
+  become: yes
+  dnf:
+    name:
+      - pkg-config
+      - dnf-plugins-core
+      - python3
+    state: latest
+
+- name: Install optional build dependencies for Python 3
+  when: python3_installed.stat.exists == false
+  become: yes
+  dnf:
+    name:
+      - gcc
+      - gcc-c++
+      - gdb
+      # - lzma
+      - glibc-devel
+      - libstdc++-devel
+      - openssl-devel
+      # - readline-devel
+      - zlib-devel
+      - libffi-devel
+      - bzip2-devel
+      - xz-devel
+      - sqlite
+      - sqlite-devel
+      - sqlite-libs
+      - libuuid-devel
+      - gdbm-libs
+      # - perf
+      - expat
+      - expat-devel
+      - mpdecimal
+      - python3-pip
+    state: latest
+
+- name: Download Python source file
+  when: python3_installed.stat.exists == false
+  become: yes
+  get_url:
+    url: https://www.python.org/ftp/python/{{ python_version }}/Python-3.12.7.tar.xz
+    dest: /tmp/Python-{{ python_version }}.tgz
+
+- name: Extract Python source file
+  when: python3_installed.stat.exists == false
+  become: yes
+  unarchive:
+    src: /tmp/Python-{{ python_version }}.tgz
+    dest: /tmp
+    remote_src: yes
+
+- name: Build Python from source and install
+  when: python3_installed.stat.exists == false
+  become: yes
+  shell: |
+    cd /tmp/Python-{{ python_version }} && \
+    ./configure --prefix=/opt/Python/Python-{{ python_version }} --enable-optimizations && \
+    make -j$(nproc) && \
+    make install
+  
+- name: Ensure Python interpreter path is set in .bashrc
+  ansible.builtin.lineinfile:
+    path: ~/.bashrc
+    regexp: '^export PATH="/opt/Python/Python-{{ python_version }}/bin'
+    line: 'export PATH="/opt/Python/Python-{{ python_version }}/bin:$PATH"'
+    state: present

@@ -1,0 +1,25 @@
+- name: Install vim
+  become: yes
+  dnf:
+    name: vim
+    state: latest
+
+- name: Install git
+  become: yes
+  dnf:
+    name: git
+    state: latest
+
+- name: Install unzip, bzip2, and xz
+  become: yes
+  dnf:
+    name:
+      - unzip
+      - bzip2
+      - xz
+    state: latest
+
+- name: Clean up unused packages
+  become: yes
+  dnf:
+    autoremove: yes

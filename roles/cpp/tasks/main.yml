@@ -1,0 +1,29 @@
+- name: Install C compiler
+  become: yes
+  dnf:
+    name: gcc
+    state: latest
+
+- name: Install C++ compiler
+  become: yes
+  dnf:
+    name: gcc-c++
+    state: latest
+
+- name: Install Clang compiler
+  become: yes
+  dnf:
+    name: clang
+    state: latest
+
+- name: Install CMake
+  become: yes
+  dnf:
+    name: cmake
+    state: latest
+
+- name: Install Ninja
+  become: yes
+  dnf:
+    name: ninja-build
+    state: present
